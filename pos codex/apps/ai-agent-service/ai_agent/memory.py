@@ -33,9 +33,11 @@ def new_session_state() -> dict[str, Any]:
     return deepcopy(DEFAULT_SESSION_STATE)
 
 
-class SessionMemory:
     def __init__(self, redis_url: str) -> None:
         # Keep Redis optional and fail fast when the server is unavailable.
+        if redis_url:
+            redis_url = str(redis_url).strip('"').strip("'")
+            
         self._redis = (
             Redis.from_url(
                 redis_url,

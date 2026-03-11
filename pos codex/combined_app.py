@@ -25,9 +25,15 @@ print(f"Starting Bhadawar AI Monolith on port {PORT}...")
 os.environ["AI_AGENT_SERVICE_URL"] = f"http://127.0.0.1:{PORT}/internal/ai"
 
 # Prioritize the Node.js backend (port 5000) for real MongoDB Atlas data
-order_url = os.getenv("ORDER_SERVICE_URL", "http://127.0.0.1:5000")
-if order_url and not order_url.startswith("http"):
-    order_url = f"https://{order_url}"
+order_url = os.getenv("ORDER_SERVICE_URL", "").strip('"').strip("'")
+if not order_url:
+    order_url = "http://127.0.0.1:5000"
+elif not order_url.startswith("http"):
+    # Render internal service name doesn't include port or protocol
+    if ":" not in order_url:
+        order_url = f"http://{order_url}:5000"
+    else:
+        order_url = f"http://{order_url}"
 os.environ["ORDER_SERVICE_URL"] = order_url
 os.environ["PAYMENT_SERVICE_URL"] = order_url
 

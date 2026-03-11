@@ -1,8 +1,17 @@
+from typing import Any
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @field_validator("redis_url", "order_service_url", "payment_service_url", mode="before")
+    @classmethod
+    def clean_urls(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            return v.strip('"').strip("'")
+        return v
 
     ai_agent_port: int = 8001
     redis_url: str = "redis://localhost:6379/0"
