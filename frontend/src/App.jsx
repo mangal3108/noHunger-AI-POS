@@ -9,6 +9,7 @@ import AddItem from './pages/AddItem'
 import EditItem from './pages/EditItem'
 import AdminBill from './pages/AdminBill'
 import AdminUserDetails from './pages/AdminUserDetails'
+import Payment from './pages/Payment'
 import { Routes, Route } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 
@@ -20,6 +21,7 @@ const App = () => {
     <>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/payment/:orderId" element={<Payment />} />
         <Route path="/admin/add-category" element={<ProtectedAdminRoute><AddCategory /></ProtectedAdminRoute>} />
         <Route path="/admin-secret-login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />

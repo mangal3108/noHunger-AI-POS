@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Nav from "../components/Nav";
 import Card from "../components/Card";
 import { dataContext } from "../context/UserContext";
@@ -11,8 +12,10 @@ import { FaUtensils, FaPizzaSlice, FaHamburger, FaIceCream, FaCoffee } from "rea
 import { GiChickenOven, GiNoodles, GiSandwich } from "react-icons/gi";
 import { clearCart } from "../redux/cartSlice";
 import { api, server } from "../helpers/api";
+import Chatbot from "../components/Chatbot";
 
 const Home = () => {
+  const navigate = useNavigate();
   let { cate, setCate, input, showCart, setShowCart, categories, foodItems, activeCategory, setActiveCategory } = useContext(dataContext);
 
   const [showBill, setShowBill] = useState(false);
@@ -94,26 +97,25 @@ const Home = () => {
           discount: item.discount,
           tax: item.tax
         })),
-        totalAmount: total
+        totalAmount: total,
+        source: 'user'
       };
 
       const response = await api.post('/orders', orderData);
 
       if (response.status === 201) {
-        toast.success("Order Placed Successfully!");
+        toast.success("Order Placed! Redirecting to Payment...");
 
-        // Save the placed order details to show in Bill
-        // Use the actual order from backend response to ensure consistency (tax, totals, ids)
+        // Save the placed order details
         setCheckoutOrder(response.data.order);
 
-        // Clear cart and inputs
+        // Clear and redirect
         dispatch(clearCart());
         setUserDetails({ name: "", email: "", phone: "" });
-
-        // Show Bill (Invoice)
-        setShowBill(true);
-        // Hide cart sidebar
         setShowCart(false);
+
+        // Navigation to Payment Page
+        navigate(`/payment/${response.data.order._id}?amount=${total}`);
       }
     } catch (error) {
       console.error(error);
@@ -456,6 +458,9 @@ const Home = () => {
           }}
         />
       )}
+
+      {/* Chatbot Widget */}
+      <Chatbot />
     </div>
   );
 };

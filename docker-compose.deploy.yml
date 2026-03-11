@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=5000
+    depends_on:
+      - ai-mono-service
+
+  ai-mono-service:
+    build:
+      context: "./pos codex"
+    ports:
+      - "8000:8000"
+    env_file:
+      - "./pos codex/.env"
+    environment:
+      - PORT=8000
+    # No infrastructure services (DBs) here because they should be remote for "free cloud" deployment
+    # But locally you can add them if needed.
+
+networks:
+  default:
+    name: nohunger-network

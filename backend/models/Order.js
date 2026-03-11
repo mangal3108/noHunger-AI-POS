@@ -60,10 +60,24 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    paymentMethod: {
+        type: String // 'UPI', 'CARD', 'NETBANKING'
+    },
+    transactionId: {
+        type: String
+    },
+    paidAt: {
+        type: Date
+    },
     status: {
         type: Number,
-        default: 2, // 1 = Paid, 2 = Unpaid
+        default: 2, // 1 = Paid, 2 = Pending/Unpaid
         enum: [1, 2]
+    },
+    source: {
+        type: String,
+        enum: ['user', 'chatbot'],
+        default: 'user'
     }
 }, {
     timestamps: true

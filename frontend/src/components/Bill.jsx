@@ -112,6 +112,12 @@ const Bill = ({ items, onClose, isAdmin = false, customerDetails, orderDate, del
                             <div className="text-right">
                                 <span className="block">Date: {formattedDate}</span>
                                 <span className="block">Time: {formattedTime}</span>
+                                {orderData?.paymentMethod && (
+                                    <span className="block font-bold text-blue-600 mt-1">{orderData.paymentMethod} Payment</span>
+                                )}
+                                {orderData?.transactionId && (
+                                    <span className="block text-[10px] text-gray-400 font-mono">Txn: {orderData.transactionId}</span>
+                                )}
                             </div>
                         </div>
                     </div>

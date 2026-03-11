@@ -274,6 +274,9 @@ const AdminBill = () => {
                                 <th className="px-3 py-2 text-left">Date & Time</th>
                                 <th className="px-3 py-2 text-left">User Name</th>
                                 <th className="px-3 py-2 text-left">Phone</th>
+                                <th className="px-3 py-2 text-left">Source</th>
+                                <th className="px-3 py-2 text-left">Payment</th>
+                                <th className="px-3 py-2 text-left">Txn ID</th>
                                 <th className="px-3 py-2 text-left">Email</th>
                                 <th className="px-3 py-2 text-right">Amount</th>
                                 <th className="px-3 py-2 text-center">Action</th>
@@ -307,6 +310,21 @@ const AdminBill = () => {
                                         </td>
                                         <td className="px-3 py-2 font-medium text-gray-800 whitespace-nowrap text-xs">{order.user?.name || "Unknown"}</td>
                                         <td className="px-3 py-2 text-gray-600 whitespace-nowrap text-xs">{order.user?.phone || "N/A"}</td>
+                                        <td className="px-3 py-2 text-center text-xs">
+                                            {order.source === 'chatbot' ? (
+                                                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-[10px] font-bold">Chatbot AI</span>
+                                            ) : (
+                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-[10px] font-bold">Web User</span>
+                                            )}
+                                        </td>
+                                        <td className="px-3 py-2 text-xs">
+                                            <span className={`px-2 py-1 rounded text-[10px] font-bold ${order.paymentMethod ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                {order.paymentMethod || 'N/A'}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-2 text-xs font-mono text-gray-500" title={order.transactionId}>
+                                            {order.transactionId ? order.transactionId.slice(-8) : 'N/A'}
+                                        </td>
                                         <td className="px-3 py-2 text-gray-600 max-w-[150px] truncate text-xs" title={order.user?.email || ""}>{order.user?.email || "N/A"}</td>
                                         <td className="px-3 py-2 font-bold text-gray-800 text-right text-xs">₹{order.totalAmount.toFixed(2)}</td>
 

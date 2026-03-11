@@ -1,0 +1,34 @@
+﻿[
+    {
+        "name":  "order-service",
+        "pid":  18148,
+        "script":  "apps/order-service/main.py",
+        "health":  "http://127.0.0.1:8002/health",
+        "out_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\order-service.out.log",
+        "err_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\order-service.err.log"
+    },
+    {
+        "name":  "payment-service",
+        "pid":  13860,
+        "script":  "apps/payment-service/main.py",
+        "health":  "http://127.0.0.1:8003/health",
+        "out_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\payment-service.out.log",
+        "err_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\payment-service.err.log"
+    },
+    {
+        "name":  "ai-agent-service",
+        "pid":  21704,
+        "script":  "apps/ai-agent-service/main.py",
+        "health":  "http://127.0.0.1:8001/health",
+        "out_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\ai-agent-service.out.log",
+        "err_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\ai-agent-service.err.log"
+    },
+    {
+        "name":  "api-gateway",
+        "pid":  18036,
+        "script":  "apps/api-gateway/main.py",
+        "health":  "http://127.0.0.1:8000/health",
+        "out_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\api-gateway.out.log",
+        "err_log":  "D:\\Projects\\pos codex\\.runtime\\logs\\api-gateway.err.log"
+    }
+]

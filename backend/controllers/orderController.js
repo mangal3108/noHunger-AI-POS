@@ -4,7 +4,7 @@ const paginate = require('../utils/pagination');
 // Create a new order
 exports.createOrder = async (req, res) => {
     try {
-        const { user, items } = req.body;
+        const { user, items, source } = req.body;
 
         // Calculate totals based on items
         let subtotal = 0;
@@ -46,7 +46,8 @@ exports.createOrder = async (req, res) => {
             taxAmount: totalTax,
             deliveryFee,
             isTaxApplied: totalTax > 0, // Set flag if tax exists
-            totalAmount
+            totalAmount,
+            source: source || 'user'
         });
 
         await newOrder.save();
@@ -385,3 +386,27 @@ exports.getUniqueUsers = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Confirm Payment (Set status to Paid and save transaction info)
+exports.confirmPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { paymentMethod, transactionId } = req.body;
+
+        const order = await Order.findById(id);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        order.status = 1; // Mark as Paid
+        order.paymentMethod = paymentMethod;
+        order.transactionId = transactionId;
+        order.paidAt = new Date();
+
+        await order.save();
+        res.status(200).json({ message: "Payment confirmed successfully", order });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+

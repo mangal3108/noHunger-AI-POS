@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Assistant</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="panel">
+      <header class="panel-header">
+        <p class="kicker">Conversational POS</p>
+        <h1>Food Ordering Console</h1>
+        <p class="hint">Use the chat to browse one restaurant menu, add address, and pay.</p>
+        <p class="hint"><a href="/admin">Open Admin Panel</a></p>
+      </header>
+
+      <div class="controls">
+        <label for="sessionId">Session ID</label>
+        <input id="sessionId" type="text" placeholder="session-001">
+        <div class="quick-actions">
+          <button type="button" class="chip" data-message="show menu">Show Menu</button>
+          <button type="button" class="chip" data-message="add 1 whopper">Add Item</button>
+          <button type="button" class="chip" data-message="my address is 22 MG Road, Bangalore 560001">Set Address</button>
+          <button type="button" class="chip" data-message="payment options">Payment Options</button>
+          <button type="button" class="chip" data-message="use cod">Use COD</button>
+          <button type="button" class="chip" data-message="pay upi">Pay UPI</button>
+          <button type="button" class="chip" data-message="track">Track Order</button>
+        </div>
+      </div>
+
+      <div id="messages" class="messages" aria-live="polite"></div>
+
+      <form id="chatForm" class="composer">
+        <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" required>
+        <button id="sendBtn" type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
