@@ -19,16 +19,32 @@ load_dotenv()
 
 # Overwrite service URLs to point to internal mounts or external Node.js backend
 PORT = int(os.getenv("PORT", "8000"))
-os.environ["AI_AGENT_SERVICE_URL"] = f"http://localhost:{PORT}/internal/ai"
+print(f"Starting Bhadawar AI Monolith on port {PORT}...")
+
+# Ensure AI_AGENT_SERVICE_URL has protocol and points to local mount
+os.environ["AI_AGENT_SERVICE_URL"] = f"http://127.0.0.1:{PORT}/internal/ai"
 
 # Prioritize the Node.js backend (port 5000) for real MongoDB Atlas data
-os.environ["ORDER_SERVICE_URL"] = os.getenv("ORDER_SERVICE_URL", "http://localhost:5000")
+order_url = os.getenv("ORDER_SERVICE_URL", "http://127.0.0.1:5000")
+if order_url and not order_url.startswith("http"):
+    order_url = f"https://{order_url}"
+os.environ["ORDER_SERVICE_URL"] = order_url
+os.environ["PAYMENT_SERVICE_URL"] = order_url
+
+print(f"Service URLs configured:")
+print(f" - AI: {os.environ['AI_AGENT_SERVICE_URL']}")
+print(f" - Order/Payment: {os.environ['ORDER_SERVICE_URL']}")
 
 # Now import the apps after setting environment variables
-from ai_agent.agent import app as ai_app
-from order_service.app import app as order_app
-from payment_service.app import app as payment_app
-from main import app as gateway_app  # From api-gateway
+try:
+    from ai_agent.agent import app as ai_app
+    from order_service.app import app as order_app
+    from payment_service.app import app as payment_app
+    from main import app as gateway_app  # From api-gateway
+    print("All sub-apps imported successfully.")
+except Exception as e:
+    print(f"CRITICAL: Failed to import sub-apps: {e}")
+    raise
 
 # Create the master Monolith app
 app = FastAPI(title="NoHunger AI POS Monolith")
