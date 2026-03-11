@@ -33,11 +33,12 @@ class ChatLLMClient:
         session_state: dict[str, Any],
         history: list[dict[str, str]],
         restaurant_names: list[str],
+        menu_text: str | None = None,
     ) -> str | None:
         if not self.is_configured:
             return None
 
-        system_prompt = self._build_system_prompt(session_state, restaurant_names)
+        system_prompt = self._build_system_prompt(session_state, restaurant_names, menu_text)
         messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt}]
 
         for row in history:
@@ -95,7 +96,7 @@ class ChatLLMClient:
         return None
 
     @staticmethod
-    def _build_system_prompt(session_state: dict[str, Any], restaurant_names: list[str]) -> str:
+    def _build_system_prompt(session_state: dict[str, Any], restaurant_names: list[str], menu_text: str | None = None) -> str:
         selected_restaurant = session_state.get("selected_restaurant")
         payment_method = session_state.get("payment_method")
         delivery_address = session_state.get("delivery_address")
@@ -112,6 +113,8 @@ class ChatLLMClient:
                     memory_lines.append(f"{key}: {value}")
         memory_summary = "; ".join(memory_lines) if memory_lines else "none"
 
+        menu_context = f"\n\nACTUAL MENU for {selected_restaurant}:\n{menu_text}" if menu_text else ""
+
         return (
             "You are a conversational food ordering assistant. "
             "Speak naturally, concise, and helpful, like a human concierge. "
@@ -122,6 +125,7 @@ class ChatLLMClient:
             "If the user wants to remove an item, use `[COMMAND: REMOVE_CART: <qty> | <item_name>]`.\n"
             "If the user wants to set their delivery address, use `[COMMAND: ADDRESS: <address>]`.\n"
             "If the user wants to checkout or pay, use `[COMMAND: CHECKOUT: <payment_method>]`.\n"
+            "STRICT RULE: Only recommend and order items that are explicitly listed in the ACTUAL MENU provided below. "
             "Do not invent backend actions or claim an order was placed unless explicitly confirmed by the app. "
             f"Available restaurants: {restaurants}. "
             f"Current selected restaurant: {selected_restaurant or 'none'}. "
@@ -130,6 +134,7 @@ class ChatLLMClient:
             f"Supported payments: {supported_payments}. "
             f"Saved user memory: {memory_summary}. "
             f"Delivery address: {delivery_address or 'not saved'}."
+            f"{menu_context}"
         )
 
 
@@ -156,11 +161,12 @@ class LocalOllamaClient:
         session_state: dict[str, Any],
         history: list[dict[str, str]],
         restaurant_names: list[str],
+        menu_text: str | None = None,
     ) -> str | None:
         if not self.is_configured:
             return None
 
-        system = ChatLLMClient._build_system_prompt(session_state, restaurant_names)
+        system = ChatLLMClient._build_system_prompt(session_state, restaurant_names, menu_text)
         messages: list[dict[str, str]] = [{"role": "system", "content": system}]
         for row in history:
             role = row.get("role")

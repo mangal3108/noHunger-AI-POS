@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Chatbot.css';
 import { FaCommentDots, FaTimes, FaUtensils, FaExpand, FaCompress } from 'react-icons/fa';
 
-const SERVER_URL = 'http://localhost:5000';
+const SERVER_URL = import.meta.env.VITE_NODE_URL || 'http://localhost:5000';
+const AI_URL = import.meta.env.VITE_AI_URL || 'http://127.0.0.1:8000';
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -54,7 +55,7 @@ const Chatbot = () => {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes timeout for LLM
-            const response = await fetch("http://localhost:8001/chat", {
+            const response = await fetch(`${AI_URL}/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -81,9 +82,10 @@ const Chatbot = () => {
                 // Update Step
                 const state = payload.session_state;
                 if (state.cart && state.cart.length > 0) {
-                    if (state.customer_name && state.customer_email && state.customer_phone && state.delivery_address) {
+                    const hasIdentity = state.customer_name && state.customer_email && state.customer_phone && state.delivery_address;
+                    if (hasIdentity) {
                         setCurrentStep(3);
-                    } else if (state.delivery_address || state.pending_slot?.startsWith("customer_")) {
+                    } else if (state.customer_name || state.pending_slot?.startsWith("customer_") || state.delivery_address || state.pending_slot === "delivery_address") {
                         setCurrentStep(2);
                     } else {
                         setCurrentStep(1);
@@ -93,7 +95,7 @@ const Chatbot = () => {
                 }
             }
 
-            setMessages([...newMessages, { text: payload.reply || "No reply from assistant.", role: 'bot', meta: `model: ${model}` }]);
+            setMessages([...newMessages, { text: payload.reply || "No reply from assistant.", role: 'bot', meta: "Bhadawar AI" }]);
         } catch (error) {
             setMessages([...newMessages, { text: `Network error: ${error.message}`, role: 'bot' }]);
         } finally {

@@ -62,7 +62,7 @@ FALLBACK_MENU: list[dict[str, Any]] = [
 
 
 class ToolExecutor:
-    def __init__(self, order_service_url: str, payment_service_url: str, restaurant_name: str = "Codex Kitchen") -> None:
+    def __init__(self, order_service_url: str, payment_service_url: str, restaurant_name: str = "Bhadawar AI") -> None:
         self.order_service_url = order_service_url
         self.payment_service_url = payment_service_url
         self.restaurant_name = restaurant_name
@@ -347,11 +347,17 @@ class ToolExecutor:
         except Exception:
             return []
 
-        if not isinstance(payload, list):
+        # Handle different response shapes
+        data = []
+        if isinstance(payload, list):
+            data = payload
+        elif isinstance(payload, dict) and isinstance(payload.get("value"), list):
+            data = payload["value"]
+        else:
             return []
 
         menu: list[dict[str, Any]] = []
-        for row in payload:
+        for row in data:
             if not isinstance(row, dict):
                 continue
             name = row.get("name")

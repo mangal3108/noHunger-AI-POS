@@ -577,6 +577,30 @@ class OrderStore:
             )
 
     @staticmethod
+    def _canonical_item_name(item_name: str) -> str:
+        lowered = item_name.strip().lower()
+        return MENU_CANONICAL_NAMES.get(lowered, item_name.strip())
+
+    def _normalize_inventory_names(self, conn: sqlite3.Connection) -> None:
+        rows = conn.execute("SELECT id, item_name, stock_qty FROM inventory").fetchall()
+        for row in rows:
+            old_id = row["id"]
+            old_name = row["item_name"]
+            stock = int(row["stock_qty"])
+            new_name = self._canonical_item_name(old_name)
+            
+            if old_name != new_name:
+                # Check if new_name already exists
+                existing = conn.execute("SELECT id, stock_qty FROM inventory WHERE item_name = ?", (new_name,)).fetchone()
+                if existing:
+                    # Merge stock and delete old
+                    conn.execute("UPDATE inventory SET stock_qty = stock_qty + ? WHERE id = ?", (stock, int(existing["id"])))
+                    conn.execute("DELETE FROM inventory WHERE id = ?", (old_id,))
+                else:
+                    # Just rename
+                    conn.execute("UPDATE inventory SET item_name = ? WHERE id = ?", (new_name, old_id))
+
+    @staticmethod
     def _menu_category(item_name: str) -> str:
         meta = MENU_METADATA.get(item_name.lower(), {})
         return str(meta.get("category") or "Chef Specials")

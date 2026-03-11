@@ -39,12 +39,21 @@ class ConversationAgent:
             remote_model=settings.remote_model_name,
             complexity_threshold=settings.reasoning_complexity_threshold,
         )
-        self.local_llm = LocalOllamaClient(
-            model=settings.local_llm_model,
-            base_url=settings.local_llm_base_url,
-            timeout_seconds=settings.local_llm_timeout_seconds,
-            enabled=settings.enable_local_llm_chat,
-        )
+        if settings.local_llm_type == "openai_api":
+            self.local_llm = ChatLLMClient(
+                api_key=settings.local_llm_api_key,
+                model=settings.local_llm_model,
+                base_url=settings.local_llm_base_url,
+                timeout_seconds=settings.local_llm_timeout_seconds,
+                enabled=settings.enable_local_llm_chat,
+            )
+        else:
+            self.local_llm = LocalOllamaClient(
+                model=settings.local_llm_model,
+                base_url=settings.local_llm_base_url,
+                timeout_seconds=settings.local_llm_timeout_seconds,
+                enabled=settings.enable_local_llm_chat,
+            )
         chat_model = settings.openai_chat_model or settings.remote_model_name
         self.chat_llm = ChatLLMClient(
             api_key=settings.openai_api_key,
@@ -96,26 +105,60 @@ class ConversationAgent:
             if len(name) < 2:
                 return "Please provide a valid name."
             session_state["customer_name"] = name
-            session_state["pending_slot"] = "customer_email"
+            
+            # Proactive check for next missing field
+            if not session_state.get("customer_email"):
+                session_state["pending_slot"] = "customer_email"
+                await self.memory.set(session_id, session_state)
+                return f"Nice to meet you, {name}! Now, what is your email address?"
+            elif not session_state.get("customer_phone"):
+                session_state["pending_slot"] = "customer_phone"
+                await self.memory.set(session_id, session_state)
+                return f"Nice to meet you, {name}! What is your mobile number?"
+            elif not session_state.get("delivery_address"):
+                session_state["pending_slot"] = "delivery_address"
+                await self.memory.set(session_id, session_state)
+                return f"Nice to meet you, {name}! Where should we deliver this?"
+            
+            session_state["pending_slot"] = None
             await self.memory.set(session_id, session_state)
-            return f"Nice to meet you, {name}! Now, what is your email address?"
+            return f"Nice to meet you, {name}! Your profile is ready. Say 'checkout' to finish."
             
         if pending_slot == "customer_email":
             email = raw_text.strip().lower()
             if "@" in email:
                 session_state["customer_email"] = email
-                session_state["pending_slot"] = "customer_phone"
+                if not session_state.get("customer_phone"):
+                    session_state["pending_slot"] = "customer_phone"
+                    await self.memory.set(session_id, session_state)
+                    return "Got it. And finally, your mobile number?"
+                elif not session_state.get("delivery_address"):
+                    session_state["pending_slot"] = "delivery_address"
+                    await self.memory.set(session_id, session_state)
+                    return "Got it. And what is your delivery address?"
+                
+                session_state["pending_slot"] = None
                 await self.memory.set(session_id, session_state)
-                return "Got it. And finally, your mobile number?"
+                return "Email saved! Ready to checkout?"
             return "Please provide a valid email address."
             
         if pending_slot == "customer_phone":
             phone = raw_text.strip()
             if len(re.sub(r"\D", "", phone)) >= 10:
                 session_state["customer_phone"] = phone
-                session_state["pending_slot"] = "payment_method"
+                if not session_state.get("delivery_address"):
+                    session_state["pending_slot"] = "delivery_address"
+                    await self.memory.set(session_id, session_state)
+                    return "Phone saved! Now, where should we deliver this order?"
+                
+                if not session_state.get("payment_method"):
+                    session_state["pending_slot"] = "payment_method"
+                    await self.memory.set(session_id, session_state)
+                    return "Phone saved! How would you like to pay? (UPI, CARD, or NetBanking)"
+                
+                session_state["pending_slot"] = None
                 await self.memory.set(session_id, session_state)
-                return "Identity verified! Finally, how would you like to pay? (UPI, CARD, or NetBanking)"
+                return "Phone saved! Say 'checkout' to finish."
             return "Please provide a valid phone number (10+ digits)."
             
         if pending_slot == "payment_method":
@@ -138,10 +181,16 @@ class ConversationAgent:
             if not address:
                 return "Please share full delivery address. Example: my address is 22 MG Road, Bangalore."
             session_state["delivery_address"] = address
-            # Start Identity collection immediately
-            session_state["pending_slot"] = "customer_name"
+            session_state["pending_slot"] = None
             await self.memory.set(session_id, session_state)
-            return f"Got it, delivery address saved: {address}. Now, what is your name?"
+            
+            # If identity is complete, go to payment
+            if not session_state.get("payment_method"):
+                session_state["pending_slot"] = "payment_method"
+                await self.memory.set(session_id, session_state)
+                return f"Got it, address saved: {address}. Finally, how would you like to pay? (UPI, CARD, or NetBanking)"
+            
+            return f"Got it, address saved: {address}. Ready to place order? Just say 'pay' or 'checkout'."
 
         if self._is_payment_options_intent(text):
             methods = await self.tools.get_payment_methods()
@@ -163,31 +212,15 @@ class ConversationAgent:
                 return f"Payment method updated to {method}. When ready, say 'checkout'."
 
         if self._is_review_intent(text):
-            food_type = self._infer_food_type(text)
-            restaurant_name = self._extract_restaurant_name(raw_text)
-            if not restaurant_name and not food_type:
-                restaurant_name = session_state.get("selected_restaurant") or settings.single_restaurant_name
-
-            if restaurant_name:
-                overview = await self.tools.get_restaurant_overview(restaurant_name)
-                if overview:
-                    session_state["selected_restaurant"] = overview["name"]
-                    await self.memory.set(session_id, session_state)
-                    return self._format_review_for_restaurant(overview)
-
-            comparison_food_type = food_type or "any"
-            restaurants = await self.tools.search_restaurants(food_type=comparison_food_type, location="nearby")
-            if not restaurants:
-                return "I could not find any restaurants right now. Try again in a moment."
-            return self._format_review_comparison(comparison_food_type, restaurants)
+            overview = await self.tools.get_restaurant_overview(settings.single_restaurant_name)
+            if overview:
+                session_state["selected_restaurant"] = overview["name"]
+                await self.memory.set(session_id, session_state)
+                return self._format_review_for_restaurant(overview)
+            return "I could not find review information right now."
 
         if self._is_restaurant_search_intent(text):
-            food_type = self._infer_food_type(text) or "any"
-            restaurants = await self.tools.search_restaurants(food_type=food_type, location="nearby")
-            session_state["last_suggestions"] = [row["name"] for row in restaurants[:5]]
-            await self.memory.set(session_id, session_state)
-            label = food_type if food_type != "any" else "food"
-            return self._format_restaurant_list(label, restaurants)
+            return "We are Bhadawar AI, your premier dining destination! Say 'show menu' to see what we have to offer."
 
         if self._is_menu_intent(text):
             restaurant_name = (
@@ -258,15 +291,7 @@ class ConversationAgent:
             cart = await self.tools.view_cart(session_state)
             if not cart["items"]:
                 return "Your cart is empty. Add items before payment."
-            if not str(session_state.get("delivery_address") or "").strip():
-                session_state["pending_slot"] = "delivery_address"
-                await self.memory.set(session_id, session_state)
-                return (
-                    "Before checkout, please share delivery address.\n"
-                    "Example: my address is 22 MG Road, Bangalore 560001."
-                )
-            
-            # Identity Check
+            # Identity Check: Name -> Email -> Phone -> Address
             if not session_state.get("customer_name"):
                 session_state["pending_slot"] = "customer_name"
                 await self.memory.set(session_id, session_state)
@@ -279,6 +304,13 @@ class ConversationAgent:
                 session_state["pending_slot"] = "customer_phone"
                 await self.memory.set(session_id, session_state)
                 return "Finally, your phone number?"
+            if not str(session_state.get("delivery_address") or "").strip():
+                session_state["pending_slot"] = "delivery_address"
+                await self.memory.set(session_id, session_state)
+                return (
+                    "Before checkout, please share delivery address.\n"
+                    "Example: my address is 22 MG Road, Bangalore 560001."
+                )
             
             # Payment Method Check
             if not session_state.get("payment_method"):
@@ -342,6 +374,12 @@ class ConversationAgent:
 
     async def _chat_like_reply(self, raw_text: str, session_state: dict[str, Any], session_id: str) -> str:
         history = self._history_for_llm(session_state)
+        
+        restaurant_name = session_state.get("selected_restaurant") or settings.single_restaurant_name
+        menu = await self.tools.get_restaurant_menu(restaurant_name)
+        menu_text = ""
+        if menu:
+            menu_text = "\n".join([f"- {item['item_name']} (INR {item['price']:.2f}): {item.get('description', '')}" for item in menu[:12]])
 
         if self.local_llm.is_configured:
             local_reply = await self.local_llm.chat(
@@ -349,6 +387,7 @@ class ConversationAgent:
                 session_state=session_state,
                 history=history,
                 restaurant_names=self.tools.list_restaurant_names(),
+                menu_text=menu_text
             )
             if local_reply:
                 self._last_model_used = self.local_llm.model
@@ -360,6 +399,7 @@ class ConversationAgent:
                 session_state=session_state,
                 history=history,
                 restaurant_names=self.tools.list_restaurant_names(),
+                menu_text=menu_text
             )
             if llm_reply:
                 self._last_model_used = self.chat_llm.model
@@ -489,6 +529,24 @@ class ConversationAgent:
 
         if action_taken:
             await self.memory.set(session_id, session_state)
+            
+            # Proactive Flow: Selection -> Identity -> Payment
+            # Only trigger proactive identity flow if items were added
+            if any("Added" in m for m in cart_messages):
+                if not session_state.get("customer_name"):
+                    session_state["pending_slot"] = "customer_name"
+                    cart_messages.append("\nTo place your order, I need some quick details. What is your name?")
+                elif not session_state.get("customer_email"):
+                    session_state["pending_slot"] = "customer_email"
+                    cart_messages.append("\nGreat! What is your email address?")
+                elif not session_state.get("customer_phone"):
+                    session_state["pending_slot"] = "customer_phone"
+                    cart_messages.append("\nFinally, your phone number?")
+                elif not str(session_state.get("delivery_address") or "").strip():
+                    session_state["pending_slot"] = "delivery_address"
+                    cart_messages.append("\nAnd where should we deliver this? (Share your full address)")
+                
+                await self.memory.set(session_id, session_state)
             
         clean_text = re.sub(r"\[COMMAND:[^\]]+\]", "", text).strip()
         if cart_messages:
@@ -669,33 +727,7 @@ class ConversationAgent:
 
     @classmethod
     def _is_restaurant_search_intent(cls, text: str) -> bool:
-        if any(token in text for token in ("menu", "add", "remove", "cart", "pay", "track", "status")):
-            return False
-
-        food_type = cls._infer_food_type(text)
-        food_context = any(
-            token in text
-            for token in ("food", "eat", "dinner", "lunch", "breakfast", "hungry", "craving")
-        )
-
-        if any(
-            token in text
-            for token in (
-                "restaurant",
-                "restaurants",
-                "resturant",
-                "resturants",
-                "near me",
-                "nearby",
-                "show places",
-            )
-        ):
-            return True
-
-        if any(token in text for token in ("suggest", "recommend", "options")) and (food_type or food_context):
-            return True
-
-        return bool(food_type and any(token in text for token in ("want", "hungry", "craving", "eat")))
+        return False  # Single restaurant POS, no search needed
 
     @staticmethod
     def _is_menu_intent(text: str) -> bool:
@@ -716,18 +748,8 @@ class ConversationAgent:
 
     @staticmethod
     def _is_review_intent(text: str) -> bool:
-        has_review_token = any(
-            token in text for token in ("review", "reviews", "rating", "ratings", "top rated", "worth it")
-        )
-        has_rank_token = any(token in text for token in ("best", "top"))
-        has_food_context = bool(
-            ConversationAgent._infer_food_type(text)
-            or any(
-                token in text
-                for token in ("restaurant", "restaurants", "resturant", "resturants", "food", "eat", "menu")
-            )
-        )
-        return has_food_context and (has_review_token or has_rank_token)
+        # Simplified for single restaurant
+        return "review" in text or "rating" in text or "worth it" in text
 
     @staticmethod
     def _is_help_intent(text: str) -> bool:

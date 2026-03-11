@@ -17,11 +17,12 @@ sys.path.append(str(ROOT / "apps" / "api-gateway"))
 # Load environment variables
 load_dotenv()
 
-# Overwrite service URLs to point to internal mounts within the same process
-# This allows the API Gateway to "proxy" to the other apps on the same port
+# Overwrite service URLs to point to internal mounts or external Node.js backend
 PORT = int(os.getenv("PORT", "8000"))
 os.environ["AI_AGENT_SERVICE_URL"] = f"http://localhost:{PORT}/internal/ai"
-os.environ["ORDER_SERVICE_URL"] = f"http://localhost:{PORT}/internal/order"
+
+# Prioritize the Node.js backend (port 5000) for real MongoDB Atlas data
+os.environ["ORDER_SERVICE_URL"] = os.getenv("ORDER_SERVICE_URL", "http://localhost:5000")
 
 # Now import the apps after setting environment variables
 from ai_agent.agent import app as ai_app

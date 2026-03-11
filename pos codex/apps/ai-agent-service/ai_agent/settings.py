@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     ai_agent_port: int = 8001
     redis_url: str = "redis://localhost:6379/0"
@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     llm_max_history_turns: int = 8
 
     enable_local_llm_chat: bool = True
+    local_llm_type: str = "ollama"  # "ollama" or "openai_api"
+    local_llm_api_key: str = ""
     local_llm_base_url: str = "http://localhost:11434"
     local_llm_model: str = "mistral"
     local_llm_timeout_seconds: float = 120.0
