@@ -33,10 +33,16 @@ def new_session_state() -> dict[str, Any]:
     return deepcopy(DEFAULT_SESSION_STATE)
 
 
+class SessionMemory:
     def __init__(self, redis_url: str) -> None:
         # Keep Redis optional and fail fast when the server is unavailable.
         if redis_url:
             redis_url = str(redis_url).strip('"').strip("'")
+        
+        # Validate URL scheme to prevent common misconfigurations (especially on Render)
+        is_valid_redis = False
+        if redis_url and any(redis_url.startswith(s) for s in ["redis://", "rediss://", "unix://"]):
+            is_valid_redis = True
             
         self._redis = (
             Redis.from_url(
@@ -46,7 +52,7 @@ def new_session_state() -> dict[str, Any]:
                 socket_timeout=0.25,
                 retry_on_timeout=False,
             )
-            if Redis and redis_url
+            if Redis and is_valid_redis
             else None
         )
         self._local_store: dict[str, dict[str, Any]] = {}

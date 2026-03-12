@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     @classmethod
     def clean_urls(cls, v: Any) -> Any:
         if isinstance(v, str):
-            return v.strip('"').strip("'")
+            v = v.strip('"').strip("'").strip()
+            if v.lower() in ("none", "undefined", ""):
+                return ""
+            return v
         return v
 
     ai_agent_port: int = 8001
