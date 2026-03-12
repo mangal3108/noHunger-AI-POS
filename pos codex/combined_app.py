@@ -41,6 +41,13 @@ print(f"Service URLs configured:")
 print(f" - AI: {os.environ['AI_AGENT_SERVICE_URL']}")
 print(f" - Order/Payment: {os.environ['ORDER_SERVICE_URL']}")
 
+# Debug AI Settings
+from ai_agent.settings import settings
+print(f"AI Configuration Loaded:")
+print(f" - Local LLM Type: {settings.local_llm_type}")
+print(f" - Local LLM API Key Present: {bool(settings.local_llm_api_key)}")
+print(f" - Local LLM Base URL: {settings.local_llm_base_url}")
+
 # Now import the apps after setting environment variables
 try:
     from ai_agent.agent import app as ai_app
