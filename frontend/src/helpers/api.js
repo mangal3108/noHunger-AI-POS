@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const rawServer = import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || "http://localhost:5000";
-// Clean trailing slash and force https for production domains
+const rawServer = import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || (import.meta.env.PROD ? "https://nohunger-ai-pos.onrender.com" : "http://localhost:5000");
+// Clean trailing slash and ensure https for production
 export const server = rawServer.endsWith('/') ? rawServer.slice(0, -1) : rawServer;
 
 export const api = axios.create({
