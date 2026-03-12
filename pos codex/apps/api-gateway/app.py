@@ -53,13 +53,13 @@ async def health() -> dict[str, str]:
 @app.get("/", response_model=None)
 async def home():
     from fastapi.responses import RedirectResponse
-    return RedirectResponse("https://frontend-gamma-six-45.vercel.app/")
+    return RedirectResponse("https://no-hunger-ai-pos.vercel.app/")
 
 
 @app.get("/admin", response_model=None)
 async def admin_home():
     from fastapi.responses import RedirectResponse
-    return RedirectResponse("https://frontend-gamma-six-45.vercel.app/admin")
+    return RedirectResponse("https://no-hunger-ai-pos.vercel.app/admin")
 
 
 @app.post("/chat")

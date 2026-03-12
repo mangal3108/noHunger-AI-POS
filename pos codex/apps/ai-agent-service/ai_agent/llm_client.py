@@ -58,10 +58,11 @@ class ChatLLMClient:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
+            "User-Agent": "NoHungerAI-Assistant/1.0"
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
+            async with httpx.AsyncClient(timeout=self.timeout_seconds, follow_redirects=True) as client:
                 response = await client.post(
                     f"{self.base_url}/chat/completions",
                     json=payload,
