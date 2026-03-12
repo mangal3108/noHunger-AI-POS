@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const server = import.meta.env.VITE_NODE_URL || "http://localhost:5000";
+export const server = import.meta.env.VITE_NODE_URL || import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 export const api = axios.create({
     baseURL: `${server}/api`,
