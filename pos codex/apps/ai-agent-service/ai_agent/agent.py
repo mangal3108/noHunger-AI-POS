@@ -740,7 +740,7 @@ class ConversationAgent:
 
     @staticmethod
     def _is_add_intent(text: str) -> bool:
-        return bool(re.search(r"\b(add|include|put)\b", text))
+        return bool(re.search(r"\b(add|include|put|buy|order|get|want|crave)\b", text))
 
     @staticmethod
     def _is_remove_intent(text: str) -> bool:

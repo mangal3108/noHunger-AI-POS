@@ -43,6 +43,15 @@ print(f" - Order/Payment: {os.environ['ORDER_SERVICE_URL']}")
 
 # Debug AI Settings
 from ai_agent.settings import settings
+
+# Production Fail-safe: If we are on Render but LLM base URL is still localhost, force it to Mistral
+if "@" not in os.environ.get("LOCAL_LLM_API_KEY", "") and os.environ.get("LOCAL_LLM_API_KEY"):
+    # If key is present but base_url is default, we likely have a typo in the env var name
+    if "localhost" in settings.local_llm_base_url:
+        print("DETECTED: Production environment with default LLM URL. Overriding to Mistral...")
+        settings.local_llm_base_url = "https://api.mistral.ai/v1"
+        settings.local_llm_type = "openai_api"
+
 print(f"AI Configuration Loaded:")
 print(f" - Local LLM Type: {settings.local_llm_type}")
 print(f" - Local LLM API Key Present: {bool(settings.local_llm_api_key)}")
