@@ -2,13 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Chatbot.css';
 import { FaCommentDots, FaTimes, FaUtensils, FaExpand, FaCompress } from 'react-icons/fa';
 
-const getBaseUrl = (url) => {
-    if (!url) return '';
-    return url.endsWith('/') ? url.slice(0, -1) : url;
-};
+import { server } from '../helpers/api';
 
-const SERVER_URL = getBaseUrl(import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || 'http://localhost:5000');
-const AI_URL = getBaseUrl(import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_AI_URL || 'http://127.0.0.1:8000');
+const SERVER_URL = server;
+const AI_URL = server;
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);

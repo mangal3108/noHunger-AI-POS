@@ -1,6 +1,8 @@
 import axios from "axios";
 
-export const server = import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || "http://localhost:5000";
+const rawServer = import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || "http://localhost:5000";
+// Clean trailing slash and force https for production domains
+export const server = rawServer.endsWith('/') ? rawServer.slice(0, -1) : rawServer;
 
 export const api = axios.create({
     baseURL: `${server}/api`,
