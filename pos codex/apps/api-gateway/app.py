@@ -120,6 +120,19 @@ async def admin_mark_notification_read(notification_id: int) -> dict | list:
     return await _proxy_json("POST", f"{ORDER_SERVICE_URL}/admin/notifications/{notification_id}/read")
 
 
+@app.get("/api/categories")
+async def api_categories() -> dict | list:
+    return await _proxy_json("GET", f"{ORDER_SERVICE_URL}/categories")
+
+
+@app.get("/api/foods")
+async def api_foods(category: str | None = None, search: str | None = None) -> dict | list:
+    params = {}
+    if category: params["category"] = category
+    if search: params["search"] = search
+    return await _proxy_json("GET", f"{ORDER_SERVICE_URL}/foods", params=params)
+
+
 async def _proxy_json(
     method: str,
     url: str,

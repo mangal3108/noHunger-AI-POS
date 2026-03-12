@@ -130,3 +130,42 @@ async def admin_mark_notification_read(notification_id: int) -> AdminNotificatio
     if not row:
         raise HTTPException(status_code=404, detail="Notification not found.")
     return AdminNotification(**row)
+
+
+@app.get("/categories")
+async def get_categories() -> list[dict[str, Any]]:
+    # Extract unique categories from menu
+    items = store.get_menu_items()
+    cats = {}
+    for it in items:
+        cname = it.get("category", "Chef Specials")
+        if cname not in cats:
+            cats[cname] = {
+                "_id": f"cat_{cname.lower().replace(' ', '_')}",
+                "name": cname,
+                "image": None
+            }
+    return list(cats.values())
+
+
+@app.get("/foods")
+async def get_foods(category: str | None = None, search: str | None = None) -> list[dict[str, Any]]:
+    items = store.get_menu_items()
+    formatted = []
+    for it in items:
+        if category and category != "All" and it.get("category") != category:
+            continue
+        if search and search.lower() not in it["item_name"].lower():
+            continue
+        formatted.append({
+            "_id": f"food_{it['item_name'].lower().replace(' ', '_')}",
+            "name": it["item_name"],
+            "image": None,
+            "price": it["price"],
+            "description": it.get("description", ""),
+            "discount": 0,
+            "tax": 5.0,
+            "active": it.get("is_available", True),
+            "category": it.get("category", "Chef Specials")
+        })
+    return formatted
