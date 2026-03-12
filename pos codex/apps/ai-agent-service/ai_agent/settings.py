@@ -31,8 +31,8 @@ class Settings(BaseSettings):
 
     enable_llm_chat: bool = True
     openai_api_key: str = ""
-    openai_base_url: str = "https://api.openai.com/v1"
-    openai_chat_model: str = "gpt-5-mini"
+    openai_base_url: str = "https://api.mistral.ai/v1"
+    openai_chat_model: str = "mistral-small-latest"
     llm_timeout_seconds: float = 18.0
     llm_max_history_turns: int = 8
 
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     local_llm_type: str = "openai_api"
     local_llm_api_key: str = ""
     local_llm_base_url: str = "https://api.mistral.ai/v1"
-    local_llm_model: str = "mistral"
+    local_llm_model: str = "mistral-small-latest"
     local_llm_timeout_seconds: float = 120.0
 
 
