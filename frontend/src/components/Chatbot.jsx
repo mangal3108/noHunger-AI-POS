@@ -7,6 +7,8 @@ import { server } from '../helpers/api';
 const SERVER_URL = server;
 const AI_URL = server;
 
+console.log("Chatbot Config:", { SERVER_URL, AI_URL, raw: import.meta.env });
+
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [sessionId, setSessionId] = useState('');
