@@ -46,7 +46,7 @@ try:
     from ai_agent.agent import app as ai_app
     from order_service.app import app as order_app
     from payment_service.app import app as payment_app
-    from main import app as gateway_app  # From api-gateway
+    from app import app as gateway_app  # From api-gateway
     print("All sub-apps imported successfully.")
 except Exception as e:
     print(f"CRITICAL: Failed to import sub-apps: {e}")
