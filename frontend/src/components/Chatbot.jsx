@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Chatbot.css';
 import { FaCommentDots, FaTimes, FaUtensils, FaExpand, FaCompress } from 'react-icons/fa';
 
-const SERVER_URL = import.meta.env.VITE_NODE_URL || 'http://localhost:5000';
-const AI_URL = import.meta.env.VITE_AI_URL || 'http://127.0.0.1:8000';
+const SERVER_URL = import.meta.env.VITE_NODE_URL || import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+const AI_URL = import.meta.env.VITE_AI_URL || import.meta.env.VITE_SERVER_URL || 'http://127.0.0.1:8000';
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +26,7 @@ const Chatbot = () => {
         setSessionId(`session-${Date.now()}`);
         setMessages([
             {
-                text: "Welcome to NoHunger AI! Try: show menu, I recommend our Chicken Biryani or Margherita Pizza. Just share your address to start checkout.",
+                text: "Welcome to Bhadawar AI! Try: show menu, I recommend our Chicken Biryani or Margherita Pizza. Just share your address to start checkout.",
                 role: "bot",
                 meta: "ready",
             }
