@@ -45,10 +45,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if FRONTEND_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
-
-
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -56,16 +52,14 @@ async def health() -> dict[str, str]:
 
 @app.get("/", response_model=None)
 async def home():
-    if FRONTEND_INDEX.exists():
-        return FileResponse(FRONTEND_INDEX)
-    return {"status": "ok", "message": "Frontend not found. Use POST /chat."}
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse("https://frontend-gamma-six-45.vercel.app/")
 
 
 @app.get("/admin", response_model=None)
 async def admin_home():
-    if FRONTEND_ADMIN_INDEX.exists():
-        return FileResponse(FRONTEND_ADMIN_INDEX)
-    return {"status": "ok", "message": "Admin frontend not found."}
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse("https://frontend-gamma-six-45.vercel.app/admin")
 
 
 @app.post("/chat")
