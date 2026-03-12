@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const rawServer = import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || (import.meta.env.PROD ? "https://nohunger-ai-pos.onrender.com" : "http://localhost:5000");
+const isLocal = typeof window !== 'undefined' && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+const rawServer = import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || (!isLocal ? "https://nohunger-ai-pos.onrender.com" : "http://localhost:5000");
 // Clean trailing slash and ensure https for production
 export const server = rawServer.endsWith('/') ? rawServer.slice(0, -1) : rawServer;
 
