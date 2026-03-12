@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .graph import build_runner
-from .llm_client import ChatLLMClient, LocalOllamaClient
+from .llm_client import ChatLLMClient
 from .memory import SessionMemory
 from .model_router import ModelRouter
 from .settings import settings
@@ -39,21 +39,13 @@ class ConversationAgent:
             remote_model=settings.remote_model_name,
             complexity_threshold=settings.reasoning_complexity_threshold,
         )
-        if settings.local_llm_type == "openai_api":
-            self.local_llm = ChatLLMClient(
-                api_key=settings.local_llm_api_key,
-                model=settings.local_llm_model,
-                base_url=settings.local_llm_base_url,
-                timeout_seconds=settings.local_llm_timeout_seconds,
-                enabled=settings.enable_local_llm_chat,
-            )
-        else:
-            self.local_llm = LocalOllamaClient(
-                model=settings.local_llm_model,
-                base_url=settings.local_llm_base_url,
-                timeout_seconds=settings.local_llm_timeout_seconds,
-                enabled=settings.enable_local_llm_chat,
-            )
+        self.local_llm = ChatLLMClient(
+            api_key=settings.local_llm_api_key,
+            model=settings.local_llm_model,
+            base_url=settings.local_llm_base_url,
+            timeout_seconds=settings.local_llm_timeout_seconds,
+            enabled=settings.enable_local_llm_chat,
+        )
         chat_model = settings.openai_chat_model or settings.remote_model_name
         self.chat_llm = ChatLLMClient(
             api_key=settings.openai_api_key,

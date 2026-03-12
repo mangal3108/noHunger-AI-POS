@@ -37,9 +37,9 @@ class Settings(BaseSettings):
     llm_max_history_turns: int = 8
 
     enable_local_llm_chat: bool = True
-    local_llm_type: str = "ollama"  # "ollama" or "openai_api"
+    local_llm_type: str = "openai_api"
     local_llm_api_key: str = ""
-    local_llm_base_url: str = "http://localhost:11434"
+    local_llm_base_url: str = "https://api.mistral.ai/v1"
     local_llm_model: str = "mistral"
     local_llm_timeout_seconds: float = 120.0
 

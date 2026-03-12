@@ -46,18 +46,11 @@ from ai_agent.settings import settings
 
 # Production Fail-safe: Strictly force Mistral on Render deployment
 if os.environ.get("RENDER") == "true":
-    print("RENDER DETECTED: Forcing Mistral API (openai_api type) for production...")
     settings.local_llm_type = "openai_api"
     settings.local_llm_base_url = "https://api.mistral.ai/v1"
-    # Ensure it uses the key from Render env vars and clean it
     key = os.environ.get("LOCAL_LLM_API_KEY", "").strip().replace('"', '').replace("'", "")
     if key:
         settings.local_llm_api_key = key
-
-print(f"AI Configuration Loaded:")
-print(f" - Local LLM Type: {settings.local_llm_type}")
-print(f" - Local LLM API Key Present: {bool(settings.local_llm_api_key)}")
-print(f" - Local LLM Base URL: {settings.local_llm_base_url}")
 
 # Now import the apps after setting environment variables
 try:
