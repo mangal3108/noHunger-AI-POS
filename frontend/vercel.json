@@ -5,10 +5,5 @@
       "source": "/(.*)",
       "destination": "/"
     }
-  ],
-  "build": {
-    "env": {
-      "VITE_SERVER_URL": "https://nohunger-backend.onrender.com"
-    }
-  }
+  ]
 }
