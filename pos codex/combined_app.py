@@ -19,7 +19,7 @@ load_dotenv()
 
 # Overwrite service URLs to point to internal mounts or external Node.js backend
 PORT = int(os.getenv("PORT", "8000"))
-print(f"Starting Bhadawar AI Monolith on port {PORT}...")
+print(f"Starting NoHunger AI Monolith on port {PORT}...")
 
 # Ensure AI_AGENT_SERVICE_URL has protocol and points to local mount
 os.environ["AI_AGENT_SERVICE_URL"] = f"http://127.0.0.1:{PORT}/internal/ai"

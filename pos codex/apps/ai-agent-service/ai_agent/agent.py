@@ -220,7 +220,7 @@ class ConversationAgent:
             return "I could not find review information right now."
 
         if self._is_restaurant_search_intent(text):
-            return "We are Bhadawar AI, your premier dining destination! Say 'show menu' to see what we have to offer."
+            return "We are NoHunger AI, your premier dining destination! Say 'show menu' to see what we have to offer."
 
         if self._is_menu_intent(text):
             restaurant_name = (
