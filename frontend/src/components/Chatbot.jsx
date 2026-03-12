@@ -25,7 +25,11 @@ const Chatbot = () => {
     useEffect(() => {
         setSessionId(`session-${Date.now()}`);
         setMessages([
-            text: "Welcome to NoHunger AI! Try: show menu, I recommend our Chicken Biryani or Margherita Pizza. Just share your address to start checkout.",
+            {
+                text: "Welcome to NoHunger AI! Try: show menu, I recommend our Chicken Biryani or Margherita Pizza. Just share your address to start checkout.",
+                role: "bot",
+                meta: "ready",
+            }
         ]);
     }, []);
 
