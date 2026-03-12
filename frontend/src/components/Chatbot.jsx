@@ -2,12 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Chatbot.css';
 import { FaCommentDots, FaTimes, FaUtensils, FaExpand, FaCompress } from 'react-icons/fa';
 
-import { server } from '../helpers/api';
+import { server, aiServer } from '../helpers/api';
 
 const SERVER_URL = server;
-const AI_URL = server;
-
-console.log("Chatbot Config:", { SERVER_URL, AI_URL, raw: import.meta.env });
+const AI_URL = aiServer;
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);

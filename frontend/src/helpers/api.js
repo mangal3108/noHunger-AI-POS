@@ -3,8 +3,11 @@ import axios from "axios";
 const isLocal = typeof window !== 'undefined' && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
 const rawServer = import.meta.env.VITE_SERVER_URL || import.meta.env.VITE_NODE_URL || (!isLocal ? "https://nohunger-ai-pos.onrender.com" : "http://localhost:5000");
-// Clean trailing slash and ensure https for production
+const rawAiServer = import.meta.env.VITE_AI_URL || import.meta.env.VITE_SERVER_URL || (!isLocal ? "https://nohunger-ai-pos.onrender.com" : "http://localhost:8001");
+
+// Clean trailing slashes
 export const server = rawServer.endsWith('/') ? rawServer.slice(0, -1) : rawServer;
+export const aiServer = rawAiServer.endsWith('/') ? rawAiServer.slice(0, -1) : rawAiServer;
 
 export const api = axios.create({
     baseURL: `${server}/api`,
