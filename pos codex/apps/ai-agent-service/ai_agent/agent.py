@@ -1153,8 +1153,21 @@ app.add_middleware(
 )
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health() -> dict[str, Any]:
+    import httpx
+    mistral_status = "untested"
+    try:
+        async with httpx.AsyncClient(timeout=5.0, trust_env=False) as client:
+            resp = await client.get("https://api.mistral.ai/v1/models")
+            mistral_status = f"ok ({resp.status_code})"
+    except Exception as e:
+        mistral_status = f"failed: {str(e)}"
+    
+    return {
+        "status": "ok",
+        "mistral_connectivity": mistral_status,
+        "environment": "production" if os.environ.get("RENDER") else "local"
+    }
 
 
 @app.post("/chat", response_model=ChatResponse)
