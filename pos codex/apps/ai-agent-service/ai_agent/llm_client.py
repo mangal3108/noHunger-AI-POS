@@ -62,7 +62,11 @@ class ChatLLMClient:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout_seconds, follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                timeout=self.timeout_seconds, 
+                follow_redirects=True,
+                trust_env=False  # Avoid environment proxy issues
+            ) as client:
                 response = await client.post(
                     f"{self.base_url}/chat/completions",
                     json=payload,
@@ -70,7 +74,7 @@ class ChatLLMClient:
                 )
                 response.raise_for_status()
         except Exception as exc:
-            logger.warning("ChatLLMClient request failed: %s", exc)
+            logger.warning("ChatLLMClient connection to %s failed: %s", self.base_url, exc)
             return None
 
         try:
