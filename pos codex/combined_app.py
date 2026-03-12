@@ -55,6 +55,15 @@ except Exception as e:
 # Create the master Monolith app
 app = FastAPI(title="NoHunger AI POS Monolith")
 
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Mount sub-apps
 app.mount("/internal/ai", ai_app)
 app.mount("/internal/order", order_app)
