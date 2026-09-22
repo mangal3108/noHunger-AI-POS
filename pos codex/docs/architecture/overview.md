@@ -10,7 +10,7 @@
 
 ## Local-First LLM Strategy
 
-- Default reasoning/tool selection: local `Mistral`.
+- Default reasoning/tool selection: local `Groq`.
 - Escalation policy for hard requests or tool failures: `Llama 3` or `GPT-5`.
 - Fallback model selection currently implemented as policy stubs in `ai_agent/model_router.py`.
 

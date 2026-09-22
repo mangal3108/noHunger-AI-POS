@@ -49,12 +49,17 @@ class ChatLLMClient:
 
         messages.append({"role": "user", "content": user_message})
 
-        payload = {
+        payload: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 420,
         }
+        if self.model.startswith("openai/gpt-oss"):
+            # gpt-oss reasoning models can burn the whole token budget on hidden
+            # reasoning tokens before emitting any content; keep effort low so
+            # replies stay fast and non-empty.
+            payload["reasoning_effort"] = "low"
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",

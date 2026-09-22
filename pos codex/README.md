@@ -100,45 +100,41 @@ If you want optional backing services:
 docker compose up -d
 ```
 
-## Optional: Local LLM (Ollama)
+## LLM Backend (Groq)
 
-By default, conversational fallback can use your local model first.
+The AI agent uses Groq's OpenAI-compatible chat API for free-form natural conversation.
 
 Set these in `.env`:
 
 ```env
 SINGLE_RESTAURANT_NAME=Codex Kitchen
 ENABLE_LOCAL_LLM_CHAT=true
-LOCAL_LLM_BASE_URL=http://localhost:11434
-LOCAL_LLM_MODEL=llama3.1:8b
+LOCAL_LLM_TYPE=openai_api
+LOCAL_LLM_API_KEY=your_groq_api_key_here
+LOCAL_LLM_BASE_URL=https://api.groq.com/openai/v1
+LOCAL_LLM_MODEL=openai/gpt-oss-120b
 LOCAL_LLM_TIMEOUT_SECONDS=18
-```
 
-## Optional: OpenAI-Compatible Replies
-
-The AI agent now supports an OpenAI-compatible chat backend for free-form natural conversation.
-
-Set these in `.env`:
-
-```env
 ENABLE_LLM_CHAT=true
-OPENAI_API_KEY=your_key_here
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_CHAT_MODEL=gpt-5-mini
+OPENAI_API_KEY=your_groq_api_key_here
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
+OPENAI_CHAT_MODEL=openai/gpt-oss-120b
 LLM_TIMEOUT_SECONDS=18
 LLM_MAX_HISTORY_TURNS=8
 ```
 
+Get a key from [console.groq.com/keys](https://console.groq.com/keys). Never commit the real key — keep it in `.env` (gitignored) locally, and set it as a secret env var in your deploy platform (e.g. Render dashboard).
+
 Notes:
-- Local LLM is tried first for free-form chat when enabled.
-- If local LLM is unavailable, OpenAI-compatible chat is used if configured.
-- If `OPENAI_API_KEY` is empty, the app still works with deterministic fallback responses.
+- Local LLM (Groq) is tried first for free-form chat when enabled.
+- If local LLM is unavailable, the OpenAI-compatible chat client is used if configured.
+- If the API key is empty, the app still works with deterministic fallback responses.
 - Tool actions (menu/cart/order/payment/track) remain deterministic and are still handled by backend services.
 
 ## Notes
 
 - Local-first model routing is implemented as policy stubs:
-  - Local: `Mistral`
+  - Local: `Groq`
   - Optional complex fallback: `Llama 3` / `GPT-5`
 - `LangGraph` runner is optional and disabled by default (`ENABLE_LANGGRAPH=false`) to keep startup deterministic.
 - Redis is optional. If unavailable, in-memory session storage is used.

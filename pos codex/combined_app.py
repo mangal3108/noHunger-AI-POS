@@ -44,11 +44,11 @@ print(f" - Order/Payment: {os.environ['ORDER_SERVICE_URL']}")
 # Debug AI Settings
 from ai_agent.settings import settings
 
-# Production Fail-safe: Strictly force Mistral on Render deployment
+# Production Fail-safe: Strictly force Groq on Render deployment
 if os.environ.get("RENDER") == "true":
     settings.local_llm_type = "openai_api"
-    settings.local_llm_base_url = "https://api.mistral.ai/v1"
-    key = os.environ.get("LOCAL_LLM_API_KEY", "").strip().replace('"', '').replace("'", "")
+    settings.local_llm_base_url = "https://api.groq.com/openai/v1"
+    key = os.environ.get("GROQ_API_KEY", os.environ.get("LOCAL_LLM_API_KEY", "")).strip().replace('"', '').replace("'", "")
     if key:
         settings.local_llm_api_key = key
 

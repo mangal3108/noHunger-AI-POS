@@ -29,14 +29,14 @@ services:
           name: nohunger-node-backend
           type: web
           property: host
-      - key: LOCAL_LLM_API_KEY
-        value: GIrdT2X8joAQI01jSnqmyHVoGE93iBPA
+      - key: GROQ_API_KEY
+        sync: false
       - key: LOCAL_LLM_TYPE
         value: openai_api
       - key: LOCAL_LLM_BASE_URL
-        value: https://api.mistral.ai/v1
+        value: https://api.groq.com/openai/v1
       - key: LOCAL_LLM_MODEL
-        value: mistral-tiny
+        value: openai/gpt-oss-120b
       - key: REDIS_URL
         sync: false
       - key: PORT
